@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine Vault 💌</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #ffd1dc, #ffe6f0);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      background: #fff;
+      width: 92%;
+      max-width: 520px;
+      border-radius: 24px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    h1 { margin: 0 0 10px; font-size: 1.8rem; }
+    .subtitle { opacity: .8; margin-bottom: 25px; }
+    .grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+    .box {
+      aspect-ratio: 1/1;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .locked { background:#eee; color:#999; }
+    .open { background:#ff4b5c; color:#fff; }
+    .today { outline: 3px solid #ff4b5c; }
+
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,.4); display:none; align-items:center; justify-content:center; }
+    .modal.active { display:flex; }
+    .modal-box { background:#fff; border-radius:20px; padding:22px; max-width:420px; width:90%; }
+    button { margin-top:16px; padding:10px 20px; border:none; border-radius:18px; background:#ff4b5c; color:#fff; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>💖 will be unlocked when time comes 💖</h1>
+  <div class="subtitle">one letter. one day. no cheating.</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div id="modalContent"></div>
+    <button onclick="location.reload()">okay 💗</button>
+  </div>
+</div>
+
+<script>
+  const days = [
+  {
+    name: 'Rose Day',
+    msg: `
+🌷 <b>CONGRATULATIONS U WON A BOUQUET</b><br><br>
+Today is Rose Day, and everyone gives flowers like it’s a rule.<br><br>
+But I didn’t want to give you something that just looks pretty for a while.<br><br>
+I wanted to give you tulips.<br><br>
+Because tulips don’t scream for attention.<br>
+They just exist quietly. Beautiful. Confident. Soft.<br><br>
+I’ll bring the bouquet myself when I come.<br>
+And inside it, two crochet tulips.<br><br>
+(As a symbol of my undying affection)<br><br>
+One for you.<br><br>
+And one for the version of me that smiled the day I realised<br>
+you’re the kind of person I’d choose again and again.
+`
+  },
+  {
+    name: 'Propose Day',
+    msg: `
+🎬 <b>WELL U WON A FREE MOVIE TICKET.. <br><br>
+(with me ofc)</b><br><br>
+From the very moment you entered my life, <br><br>
+I knew my search for meaning was over.<br><br>
+ Today, and every day, <br><br>
+ I propose my heart to you all over again.<br><br>
+ I propose to choose you, to cherish you, <br><br>
+ to stand by you through every storm and sunset. <br><br>
+ I propose a lifetime of laughter, <br><br>
+ of deep conversations, of passionate love and gentle comfort.<br><br>
+  My soul officially and forever proposes to yours <br><br>
+  for an endless partnership in this beautiful journey. <br><br>
+  I am yours, completely and irrevocably.
+`
+  },
+  {
+    name: 'Chocolate Day',
+    msg: `
+🍫 <b>CONGRATULATIONS U WON<br><br> 'CHOCOLATE OF UR CHOICE FREE WILL'</b><br><br>
+Chocolate Day is about comfort.<br>
+About something sweet you reach for without thinking too much.<br><br>
+So this is for those moments.<br><br>
+Call me when you’re bored.<br>
+Call me when your day feels heavy.<br>
+Call me when you don’t even know why you want to talk.<br><br>
+I’ll be there.<br>
+Not perfectly.<br>
+Just honestly.<br><br>
+Some things aren’t meant to finish quickly.<br>
+And I hope I’m one of them.<br><br>
+
+
+And Abt that free will just tell me which one would u like .💗💗<<3
+`
+  },
+  {
+    name: 'Teddy Day',
+    msg: `
+🧸 <b>YOU WON A TEDDY<del>bear</del>. PUPPY</b><br><br>
+My precious love, you are my cuddliest,<br><br>
+ most cherished teddy bear,<br><br>
+  the one I always want to hold close.<br><br>
+Even when we're apart, thinking of you <br><br>
+gives me the warmest, softest,<br><br>
+ most comforting feeling inside. <br><br>
+ You are my partner in cozy dreams,<br><br>
+  my safe haven, and the adorable, <br><br>
+  loving soul I get to call mine. <br><br>
+  I promise to always be your shelter, <br><br>
+  to hold you through everything,<br><br>
+ and to be the person you can always<br><br>
+  snuggle up to with your whole heart.
+`
+  },
+  {
+    name: 'Promise Day',
+    msg: `
+🤞 <b>OH HOO LOTTERY MAN (me) BECAME BROKE <br><br> SO U DID NOT WIN ANYTHING TODAY </b><br><br>
+Promise Day makes people say big things.<br>
+Forever this. Always that.<br><br>
+I don’t want to promise you the world.<br><br>
+I want to promise you something smaller, but stronger.<br><br>
+I’ll show up.<br>
+I’ll be honest.<br>
+I won’t disappear when things stop being exciting or easy.<br><br>
+I’ll choose consistency over drama.<br>
+And effort over excuses.<br><br>
+Not loudly.<br>
+Not perfectly.<br><br>
+Just sincerely.
+`
+  },
+  {
+    name: 'Hug Day',
+    msg: `
+🤍 <b>Hug Day</b><br><br>
+This coupon unlocks a very serious thing.<br><br>
+A 3–4 hour hug session.<br><br>
+No talking required.<br>
+No explanations needed.<br>
+Just closeness that says more than words ever could.<br><br>
+The kind of hug where time slows down.<br>
+Where worries get quieter.<br>
+Where everything feels a little more okay.<br><br>
+Comfort shouldn’t expire.<br>
+And this one never will.
+`
+  },
+  {
+    name: 'Kiss Day',
+    msg: `
+😳 <b>AND TODAY U LOSTTT <br><br>
+    NOW U HAVE TO SEND A CUTUUU SA VOICE NOTE <br><br>
+(atleast 3 min long)</b><br><br>
+My love, today isn't about a physical touch,<br><br>
+ but about the sweetness held in the very thought of you.<br><br>
+It's the soft smile you inspire, <br><br>
+the warmth that spreads through my chest<br><br>
+when I hear your voice.<br><br>
+Kiss Day, to me, is the quiet promise in your laugh,<br><br>
+the tenderness in your words,<br><br>
+and the beautiful closeness I feel even in our shared silence.<br><br>
+You are the most lovely thought I hold,<br><br>
+the most cherished feeling in my heart,<br><br>
+making even the air sweeter. I celebrate the gentle,<br><br>
+soul-deep affection I have for you, <br><br>
+which feels more profound than any single touch ever could.
+`
+  },
+  {
+    name: "Valentine's Day",
+    msg: `
+💘 <b>YOU WON 'MEEEEEEEEE'</b><br><br>
+This isn’t a coupon.<br><br>
+This is me standing here, emotionally exposed, and still calm about it.<br><br>
+I choose you.<br><br>
+I choose the way you talk.<br>
+The way you exist.<br>
+The way you make ordinary moments feel softer.<br><br>
+Not loudly.<br>
+Not dramatically.<br><br>
+Just clearly.<br><br>
+You’re my Valentine.<br>
+I’m not asking.<br><br>
+I’m telling you.
+`
+  }
+];
+
+  // 🔑 SIMPLE, CORRECT LOGIC
+  const YEAR = new Date().getFullYear();
+  const START = new Date(YEAR, 1, 7); // Feb 7
+  const TODAY = new Date(2026,1,14);
+  TODAY.setHours(0,0,0,0);
+
+  const grid = document.getElementById('grid');
+
+  days.forEach((day, i) => {
+    const box = document.createElement('div');
+    box.className = 'box';
+
+    const unlock = new Date(YEAR, 1, 7 + i);
+    unlock.setHours(0,0,0,0);
+
+    if (TODAY >= unlock) {
+      box.classList.add('open');
+      box.textContent = day.name;
+      if (+TODAY === +unlock) box.classList.add('today');
+      box.onclick = () => {
+        document.getElementById('modalContent').innerHTML = day.msg;
+        document.getElementById('modal').classList.add('active');
+      };
+    } else {
+      box.classList.add('locked');
+      box.textContent = '🔒';
+    }
+
+    grid.appendChild(box);
+  });
+</script>
+</body>
+</html>
